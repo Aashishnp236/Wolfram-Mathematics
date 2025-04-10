@@ -1,0 +1,81 @@
+(* ===================================================== *)
+(* Advanced Differential Equation Solver - Final Version *)
+(* ===================================================== *)
+
+ClearAll["Global`*"];
+
+(* === Step 1: Manual Input === *)
+Print["Please enter your differential equation (e.g., y''[x] + 3 y'[x] + 2 y[x] == 0):"];
+eq = Input["Enter differential equation: "];
+
+Print["Equation entered: ", eq];
+
+(* === Step 2: Classification === *)
+order = Max[Cases[eq, Derivative[n_][y][x_] :> n, Infinity]];
+linearQ = FreeQ[eq, (y[x])^n_ /; n > 1 || Derivative[_][y][x]^n_ /; n > 1];
+constantCoeffQ = FreeQ[eq, x];
+
+Print["Order: ", order];
+Print["Linearity: ", If[linearQ, "Linear", "Nonlinear"]];
+Print["Coefficients: ", If[constantCoeffQ, "Constant", "Variable"]];
+
+(* === Step 3: Solver Choice === *)
+solution =.;
+numericQ = False;
+
+If[constantCoeffQ,
+  (* Constant Coefficient Case *)
+  Print["Solving using constant coefficient method..."];
+  solution = Quiet@Check[DSolve[eq, y[x], x], $Failed];
+
+  If[solution === $Failed,
+    Print["⚠️ Symbolic solve failed. Trying numerical solution..."];
+    initConds = {y[0] == 1, y'[0] == 0};  (* Modify as needed *)
+    solution = NDSolve[{eq, Sequence @@ initConds}, y, {x, 0, 10}];
+    numericQ = True;,
+    Print["✅ Symbolic solution: ", solution];
+  ];
+
+  (* Step-by-step: Characteristic Equation *)
+  Print["📝 Step-by-step: Characteristic Equation"];
+  charEq = eq /. {y''[x] -> r^2, y'[x] -> r, y[x] -> 1};
+  roots = Solve[charEq[[1]] == 0, r];
+  Print["Characteristic Equation: ", charEq == 0];
+  Print["Roots: ", roots];
+  ,
+  (* Variable Coefficient Case *)
+  Print["Solving using variable coefficient method..."];
+  solution = Quiet@Check[DSolve[eq, y[x], x], $Failed];
+
+  If[solution === $Failed,
+    Print["⚠️ Symbolic solve failed. Trying numerical solution..."];
+    initConds = {y[0] == 1, y'[0] == 0};  (* Modify as needed *)
+    solution = NDSolve[{eq, Sequence @@ initConds}, y, {x, 0, 10}];
+    numericQ = True;,
+    Print["✅ Symbolic solution: ", solution];
+  ];
+];
+
+(* === Step 4: Improved Verification === *)
+If[!numericQ,
+  Print["🔁 Verifying the solution..."];
+  solExpr = y[x] /. First[solution];  (* Extract y[x] from solution *)
+  
+  lhsEval = eq[[1]] /. y -> Function[x, solExpr];  (* Use function form *)
+  residual = FullSimplify[lhsEval];
+
+  Print["Residual after substituting solution: ", residual];
+
+  If[residual === 0 || residual === True,
+    Print["✅ Verification passed (symbolically zero)."],
+    
+    (* Try evaluating the residual numerically at a few points *)
+    testVals = Table[{x -> i}, {i, 1, 3}];
+    numericCheck = And @@ (Chop[Abs[Evaluate[residual /. #]]] < 10^-6 & /@ testVals);
+    
+    If[numericCheck,
+      Print["✅ Verification passed (numerically matches at test points)."],
+      Print["❌ Verification failed. Residual: ", residual]
+    ];
+  ];
+];
