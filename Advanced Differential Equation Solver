@@ -1,6 +1,6 @@
 (* ===================================================== *)
-(* Advanced Differential Equation Solver - Final Version *)
-(* Full Classification and Clean Output                  *)
+(* Advanced Differential Equation Solver  *)
+(* Aashish Tharu Gamuwa                  *)
 (* ===================================================== *)
 
 ClearAll["Global`*"];
@@ -29,7 +29,7 @@ constantCoeffQ = FreeQ[eq, x];
 homogeneousQ = TrueQ[Simplify[eq[[2]] === 0]];
 
 (* === Step 3: Display Classification === *)
-Print["📘 Classification Summary:"];
+Print[" Classification Summary:"];
 Print["- Ordinary Differential Equation: ", If[odeQ, "Yes", "No"]];
 Print["- Order: ", order];
 Print["- Linearity: ", If[linearQ, "Linear", "Nonlinear"]];
@@ -42,7 +42,7 @@ numericQ = False;
 
 If[constantCoeffQ,
   (* Constant Coefficient Case *)
-  Print["🧮 Solving using constant coefficient method..."];
+  Print[" Solving using constant coefficient method..."];
   solution = Quiet@Check[DSolve[eq, y[x], x], $Failed];
 
   If[solution === $Failed,
@@ -61,7 +61,7 @@ If[constantCoeffQ,
   Print["Roots: ", roots];
   ,
   (* Variable Coefficient Case *)
-  Print["🧮 Solving using variable coefficient method..."];
+  Print["Solving using variable coefficient method..."];
   solution = Quiet@Check[DSolve[eq, y[x], x], $Failed];
 
   If[solution === $Failed,
