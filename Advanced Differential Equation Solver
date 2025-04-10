@@ -54,7 +54,7 @@ If[constantCoeffQ,
   ];
 
   (* Step-by-step: Characteristic Equation *)
-  Print["📝 Step-by-step: Characteristic Equation"];
+  Print[" Step-by-step: Characteristic Equation"];
   charEq = eq /. {y''[x] -> r^2, y'[x] -> r, y[x] -> 1};
   roots = Solve[charEq[[1]] == 0, r];
   Print["Characteristic Equation: ", charEq == 0];
